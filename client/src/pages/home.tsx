@@ -857,7 +857,7 @@ function AboutView() {
             transition={{ duration: 0.6 }}
           >
             <img 
-              src="https://images.unsplash.com/photo-1557685601-2a62831f2284?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" 
+              src="https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyxi-FahMKnMk5kh1qr2fffqANJpwWjriuoY5axI-pMwO3ghw-QPr1uZ6Arc7Ma0VYca33wSW9TgE5qzSZXjQxSxGCUn6sTMJAkDdEW8tJX7oI44-55COoX9uidw0ieh_5rG7Ac9Q=s680-w680-h510-rw" 
               alt="Accueil Institut Anaros"
               className="w-full h-full object-cover min-h-[400px]"
             />
