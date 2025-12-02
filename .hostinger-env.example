@@ -1,0 +1,16 @@
+# Configuration pour Hostinger
+# Copiez ce fichier en .env et remplissez les valeurs
+
+NODE_ENV=production
+PORT=5000
+
+# Base de données - Remplacez par vos identifiants
+# Format: postgresql://user:password@host:port/database
+DATABASE_URL=postgresql://user:password@localhost:5432/anaros_spa
+
+# Session secrète - Générez une clé aléatoire longue
+SESSION_SECRET=your-very-long-random-secret-key-change-this-in-production
+
+# Optionnel : Configuration supplémentaire
+APP_NAME=ANAROS Beauty Lounge
+APP_URL=https://votre-domaine.com
