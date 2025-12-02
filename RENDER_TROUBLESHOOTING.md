@@ -28,6 +28,34 @@ Les scripts ont été corrigés pour utiliser `npx tsx` :
 - Commit : `5a19113`
 - Message : "Fix: Use npx tsx for build and dev scripts to work on Render"
 
+## ❌ Erreur : `Cannot find package 'esbuild'`
+
+### Problème
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esbuild' imported from /opt/render/project/src/script/build.ts
+==> Build failed 😞
+```
+
+### Cause
+Render n'installe pas les `devDependencies` par défaut, mais `esbuild` est nécessaire pour le build en production.
+
+### Solution ✅
+`esbuild` a été déplacé de `devDependencies` vers `dependencies` :
+
+```json
+{
+  "dependencies": {
+    "...": "...",
+    "esbuild": "^0.25.0",
+    "...": "..."
+  }
+}
+```
+
+### Commit de la correction
+- Commit : `5bc996f`
+- Message : "Fix: Move esbuild to dependencies for Render build"
+
 ## 🔍 Autres Erreurs Courantes
 
 ### ❌ "Build failed" - Dépendances manquantes
