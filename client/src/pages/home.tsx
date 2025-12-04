@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, MapPin, Phone, Clock, Instagram, Star, Sparkles, Scissors, 
   Droplet, Heart, Palette, ShieldCheck, Gem, UserCheck, ChevronRight, 
-  BookOpen, Layout, Users, Zap, Mail, ArrowUp, Send, Loader2, CheckCircle
+  BookOpen, Layout, Users, Zap, Mail, ArrowUp, Send, Loader2, CheckCircle, ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import logoImage from '@assets/IMG-20251201-WA0024_1764618421640.jpg';
+import ShopView from './shop';
 
 // Contact form schema
 const contactFormSchema = z.object({
@@ -39,6 +40,7 @@ const SITE_SUBTITLE = "Beauty Lounge";
 const navigation = [
   { name: 'Accueil', id: 'home', icon: Layout },
   { name: 'Services', id: 'services', icon: Scissors },
+  { name: 'Boutique', id: 'shop', icon: ShoppingCart },
   { name: 'Galerie', id: 'gallery', icon: Palette },
   { name: 'À Propos', id: 'about', icon: Users },
   { name: 'Actualités', id: 'news', icon: Zap },
@@ -1392,6 +1394,8 @@ export default function Home() {
         return <HomeView onNavigate={handleNavigate} />;
       case 'services':
         return <ServicesView />;
+      case 'shop':
+        return <ShopView />;
       case 'gallery':
         return <GalleryView />;
       case 'about':
