@@ -321,6 +321,7 @@ export default function ShopView() {
   const [expandedProducts, setExpandedProducts] = useState<ExpandedProduct>({});
   const [cart, setCart] = useState<any[]>([]);
   const [showCart, setShowCart] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const allProducts = getAllProducts();
 
@@ -358,6 +359,28 @@ export default function ShopView() {
 
   const removeFromCart = (cartId: number) => {
     setCart(prev => prev.filter(item => item.cartId !== cartId));
+  };
+
+  // Generate WhatsApp message
+  const generateWhatsAppMessage = () => {
+    const phoneNumber = '213542384160'; // WhatsApp format: country code + number without +
+    let message = '🛍️ *Commande depuis ANAROS Beauty Lounge*\n\n';
+    message += '*Produits sélectionnés:*\n';
+    
+    cart.forEach((item, index) => {
+      message += `\n${index + 1}. *${item.name}*\n`;
+      message += `   💰 Prix: ${item.price}€\n`;
+      message += `   📝 ${item.description}\n`;
+    });
+    
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    message += `\n*Total: ${total}€*\n\n`;
+    message += '📞 Merci de confirmer ma commande!\n';
+    message += '✨ ANAROS Beauty Lounge';
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
   };
 
   const fadeInUp = {
@@ -405,65 +428,98 @@ export default function ShopView() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className={`grid gap-8 ${sidebarOpen ? 'grid-cols-1 lg:grid-cols-4' : 'grid-cols-1'}`}>
           {/* Sidebar - Categories */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-1"
-          >
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h2 className="text-xl font-serif text-stone-800 mb-6">Catégories</h2>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                    !selectedCategory
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-                  }`}
-                >
-                  Tous les produits
-                </button>
-
-                {shopData.categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() =>
-                      setSelectedCategory(
-                        selectedCategory === category.id ? null : category.id
-                      )
-                    }
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center justify-between ${
-                      selectedCategory === category.id
-                        ? 'bg-amber-600 text-white'
-                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2">
-                      <span>{category.icon}</span>
-                      {category.name}
-                    </span>
-                    <span className="text-xs bg-stone-200 px-2 py-1 rounded">
-                      {category.products.length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Cart Button */}
-              <button
-                onClick={() => setShowCart(!showCart)}
-                className="w-full mt-6 bg-amber-600 text-white px-4 py-3 rounded-lg hover:bg-amber-700 transition-all flex items-center justify-center gap-2"
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ delay: 0.2 }}
+                className="lg:col-span-1"
               >
-                <ShoppingCart className="w-5 h-5" />
-                Panier ({cart.length})
-              </button>
-            </div>
-          </motion.div>
+                <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-serif text-stone-800">Catégories</h2>
+                    <button
+                      onClick={() => setSidebarOpen(false)}
+                      className="p-2 hover:bg-stone-100 rounded-lg transition-all text-stone-600 hover:text-stone-800"
+                      title="Réduire le menu"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => setSelectedCategory(null)}
+                      className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                        !selectedCategory
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      }`}
+                    >
+                      Tous les produits
+                    </button>
+
+                    {shopData.categories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() =>
+                          setSelectedCategory(
+                            selectedCategory === category.id ? null : category.id
+                          )
+                        }
+                        className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center justify-between ${
+                          selectedCategory === category.id
+                            ? 'bg-amber-600 text-white'
+                            : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>{category.icon}</span>
+                          {category.name}
+                        </span>
+                        <span className="text-xs bg-stone-200 px-2 py-1 rounded">
+                          {category.products.length}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Cart Button */}
+                  <button
+                    onClick={() => setShowCart(!showCart)}
+                    className="w-full mt-6 bg-amber-600 text-white px-4 py-3 rounded-lg hover:bg-amber-700 transition-all flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Panier ({cart.length})
+                  </button>
+
+                  {/* Close Sidebar Button at Bottom */}
+                  <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="w-full mt-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-all text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Fermer le menu
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Toggle Button when sidebar is closed */}
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="fixed left-4 top-24 z-40 bg-amber-600 text-white p-3 rounded-lg hover:bg-amber-700 transition-all shadow-lg"
+              title="Ouvrir le menu des catégories"
+            >
+              <ChevronDown className="w-5 h-5 rotate-90" />
+            </button>
+          )}
 
           {/* Main Content - Products */}
           <motion.div
@@ -471,7 +527,7 @@ export default function ShopView() {
             animate="visible"
             variants={fadeInUp}
             transition={{ delay: 0.3 }}
-            className="lg:col-span-3"
+            className={sidebarOpen ? 'lg:col-span-3' : 'lg:col-span-4'}
           >
             {filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -642,8 +698,8 @@ export default function ShopView() {
                       ))}
                     </div>
 
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between mb-4">
+                    <div className="border-t pt-4 space-y-3">
+                      <div className="flex justify-between">
                         <span className="font-semibold text-stone-800">
                           Total:
                         </span>
@@ -651,8 +707,16 @@ export default function ShopView() {
                           {cart.reduce((sum, item) => sum + item.price, 0)}€
                         </span>
                       </div>
-                      <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">
-                        Procéder au paiement
+                      
+                      {/* WhatsApp Button */}
+                      <Button 
+                        onClick={generateWhatsAppMessage}
+                        className="w-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-4.255.949c-1.238.503-2.335 1.236-3.356 2.259-1.02 1.02-1.756 2.117-2.259 3.355C2.05 12.745 1.5 14.373 1.5 16.025c0 1.652.55 3.28 1.637 4.757l-1.738 5.318 5.318-1.738c1.477 1.087 3.105 1.637 4.757 1.637 1.652 0 3.28-.55 4.757-1.637 1.02-1.02 1.756-2.117 2.259-3.355.503-1.238.949-2.866.949-4.255 0-1.652-.55-3.28-1.637-4.757-1.02-1.02-2.117-1.756-3.355-2.259-1.238-.503-2.866-.949-4.255-.949z"/>
+                        </svg>
+                        Discuter sur WhatsApp
                       </Button>
                     </div>
                   </>
