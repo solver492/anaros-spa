@@ -1,6 +1,9 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { CartProvider } from "@/hooks/use-cart";
+import { CartDrawer } from "@/components/cart-drawer";
+import { FloatingCart } from "@/components/floating-cart";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
@@ -35,10 +38,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <CartProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+          <CartDrawer />
+          <FloatingCart />
+        </TooltipProvider>
+      </CartProvider>
     </QueryClientProvider>
   );
 }

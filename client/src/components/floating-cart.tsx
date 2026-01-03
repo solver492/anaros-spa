@@ -9,12 +9,14 @@ export function FloatingCart() {
 
     return (
         <motion.div
-            initial={{ scale: 0, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0, opacity: 0, y: 20 }}
+            drag
+            dragMomentum={false}
+            initial={{ scale: 0, opacity: 0, x: 0, y: 0 }}
+            animate={{ scale: 1, opacity: 1, x: 0, y: 0 }}
+            exit={{ scale: 0, opacity: 0, y: -20 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-[100]"
+            className="fixed top-32 right-8 z-[100] cursor-move"
         >
             <button
                 onClick={() => setIsCartOpen(true)}

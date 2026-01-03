@@ -7,7 +7,7 @@ interface CartItem extends Product {
 
 interface CartContextType {
     cart: CartItem[];
-    addToCart: (product: Product) => void;
+    addToCart: (product: Product, openDrawer?: boolean) => void;
     removeFromCart: (cartId: number) => void;
     clearCart: () => void;
     totalAmount: number;
@@ -29,9 +29,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('anaros_cart', JSON.stringify(cart));
     }, [cart]);
 
-    const addToCart = (product: Product) => {
+    const addToCart = (product: Product, openDrawer: boolean = true) => {
         setCart(prev => [...prev, { ...product, cartId: Date.now() }]);
-        setIsCartOpen(true); // Open cart automatically when adding
+        if (openDrawer) {
+            setIsCartOpen(true); // Open cart automatically ONLY if requested
+        }
     };
 
     const removeFromCart = (cartId: number) => {

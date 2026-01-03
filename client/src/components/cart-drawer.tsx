@@ -11,11 +11,10 @@ export function CartDrawer() {
         let message = '✨ *Nouvelle Commande - ANAROS Beauty Lounge*\n\n';
 
         cart.forEach((item, index) => {
-            message += `${index + 1}. *${item.name}* - ${item.price}€\n`;
+            message += `${index + 1}. *${item.name}*\n`;
         });
 
-        message += `\n💰 *Total: ${totalAmount.toFixed(2)}€*\n\n`;
-        message += 'Je souhaiterais obtenir ces produits. Merci !';
+        message += '\nJe souhaiterais obtenir des informations/réserver pour ces soins. Merci !';
 
         window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
     };
@@ -68,7 +67,7 @@ export function CartDrawer() {
                                         </div>
                                         <div className="flex-1">
                                             <h4 className="font-medium text-stone-900 truncate">{item.name}</h4>
-                                            <p className="text-amber-600 font-bold mt-1">{item.price}€</p>
+                                            {/* Price removed as per request */}
                                         </div>
                                         <button
                                             onClick={() => removeFromCart(item.cartId)}
@@ -97,10 +96,7 @@ export function CartDrawer() {
 
                         {cart.length > 0 && (
                             <div className="p-8 bg-stone-50 border-t border-stone-100 space-y-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className="text-stone-500 font-medium">Total de la commande</span>
-                                    <span className="text-2xl font-bold text-stone-900">{totalAmount.toFixed(2)}€</span>
-                                </div>
+                                {/* Total amount removed as per request */}
 
                                 <Button
                                     onClick={generateWhatsAppMessage}

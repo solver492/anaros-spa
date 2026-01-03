@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/hooks/use-cart';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type { News, Gallery } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
@@ -505,6 +506,8 @@ function ServicesDetailView({ service, onBack }: {
   onBack: () => void;
 }) {
   const Icon = service.icon;
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   return (
     <motion.div
@@ -553,6 +556,39 @@ function ServicesDetailView({ service, onBack }: {
           <Button
             className="mt-8 bg-amber-600 hover:bg-amber-700 text-white px-8"
             data-testid="button-book-service"
+            onClick={() => {
+              addToCart({
+                id: `service-booking-${service.id}`,
+                name: `Réservation: ${service.title}`,
+                slug: `service-${service.id}`,
+                price: "0",
+                description: `Demande pour ${service.title}`,
+                stock: 999,
+                images: [service.image],
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                features: [],
+                published: true,
+                tags: ["service"],
+                categoryId: null,
+                shortDescription: null,
+                compareAtPrice: null,
+                cost: null,
+                sku: null,
+                barcode: null,
+                lowStockThreshold: null,
+                weight: null,
+                dimensions: null,
+                metaTitle: null,
+                metaDescription: null,
+                featured: false
+              } as any, false);
+
+              toast({
+                title: "Ajouté à votre sélection",
+                description: "Le service a été ajouté. Cliquez sur la bulle pour finaliser.",
+              });
+            }}
           >
             Prendre Rendez-vous
           </Button>
@@ -637,6 +673,8 @@ function ServicesView() {
 
 // --- GALLERY VIEW ---
 function GalleryView() {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
   const { data: dynamicGallery } = useQuery<Gallery[]>({
     queryKey: ["/api/gallery"],
   });
@@ -860,8 +898,41 @@ function GalleryView() {
                 <Button
                   className="mt-8 bg-amber-600 hover:bg-amber-700 text-white border-none h-12 rounded-full"
                   onClick={() => {
-                    setSelectedImage(null);
-                    window.location.hash = "contact";
+                    if (selectedImage) {
+                      addToCart({
+                        id: `service-gallery-${selectedImage.id}`,
+                        name: `Soin Similaire: ${selectedImage.caption?.substring(0, 30) || 'Soin'}...`,
+                        slug: `soin-gallery-${selectedImage.id}`,
+                        price: "5000.00", // Prix indicatif
+                        description: "Réservation initiée depuis la galerie",
+                        stock: 99,
+                        images: [selectedImage.imageUrl],
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        features: [],
+                        published: true,
+                        tags: ["soin", "galerie"],
+                        categoryId: null, // Ajoutez les champs manquants requis par le type Product
+                        shortDescription: null,
+                        compareAtPrice: null,
+                        cost: null,
+                        sku: null,
+                        barcode: null,
+                        lowStockThreshold: null,
+                        weight: null,
+                        dimensions: null,
+                        metaTitle: null,
+                        metaDescription: null,
+                        featured: false
+                      } as any, false);
+
+                      setSelectedImage(null);
+
+                      toast({
+                        title: "Ajouté à votre sélection",
+                        description: "Le soin a été ajouté. Cliquez sur la bulle flottante pour voir votre sélection.",
+                      });
+                    }
                   }}
                 >
                   Réserver un soin similaire
