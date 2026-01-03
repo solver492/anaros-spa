@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer, decimal, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer, decimal, boolean, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -191,3 +191,45 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
 
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
+// News
+export const news = pgTable("news", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  date: text("date").notNull(),
+  image: text("image"),
+  excerpt: text("excerpt").notNull(),
+  published: boolean("published").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertNewsSchema = createInsertSchema(news).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertNews = z.infer<typeof insertNewsSchema>;
+export type News = typeof news.$inferSelect;
+
+// Gallery
+export const gallery = pgTable("gallery", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  imageUrl: text("image_url").notNull(),
+  caption: text("caption"),
+  productId: varchar("product_id"),
+  displayOrder: integer("display_order").default(0),
+  published: boolean("published").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertGallerySchema = createInsertSchema(gallery).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertGallery = z.infer<typeof insertGallerySchema>;
+export type Gallery = typeof gallery.$inferSelect;

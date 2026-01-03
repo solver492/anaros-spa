@@ -37,6 +37,10 @@ export function log(message: string, source = "express") {
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
+  const method = req.method;
+
+  log(`Incoming request: ${method} ${path}`);
+
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
@@ -47,18 +51,34 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+    let logLine = `${method} ${path} ${res.statusCode} in ${duration}ms`;
 
-      log(logLine);
+    if (path.startsWith("/api") && capturedJsonResponse) {
+      logLine += ` :: ${JSON.stringify(capturedJsonResponse).substring(0, 200)}${JSON.stringify(capturedJsonResponse).length > 200 ? "..." : ""}`;
     }
+
+    log(logLine);
   });
 
   next();
 });
+
+function printRoutes(app: express.Express) {
+  log("Listing registered routes:");
+  app._router.stack.forEach((middleware: any) => {
+    if (middleware.route) {
+      // routes registered directly on the app
+      log(`${Object.keys(middleware.route.methods).join(",").toUpperCase()} ${middleware.route.path}`);
+    } else if (middleware.name === "router") {
+      // router middleware
+      middleware.handle.stack.forEach((handler: any) => {
+        if (handler.route) {
+          log(`${Object.keys(handler.route.methods).join(",").toUpperCase()} ${handler.route.path}`);
+        }
+      });
+    }
+  });
+}
 
 (async () => {
   try {
@@ -71,6 +91,7 @@ app.use((req, res, next) => {
     }
 
     await registerRoutes(httpServer, app);
+    printRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
@@ -98,7 +119,7 @@ app.use((req, res, next) => {
         host,
       },
       () => {
-        log(`Server successfully listening on http://${host}:${port}`);
+        log(`Server successfully listening on http://localhost:${port}`);
       },
     );
   } catch (error) {

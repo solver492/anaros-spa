@@ -11,6 +11,8 @@ import ProductsManagement from "@/pages/backoffice-products";
 import CategoriesManagement from "@/pages/backoffice-categories";
 import OrdersManagement from "@/pages/backoffice-orders";
 import CustomersManagement from "@/pages/backoffice-customers";
+import NewsManagement from "@/pages/backoffice-news";
+import GalleryManagement from "@/pages/backoffice-gallery";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -23,6 +25,8 @@ function Router() {
       <ProtectedRoute path="/backoffice/categories" component={CategoriesManagement} />
       <ProtectedRoute path="/backoffice/orders" component={OrdersManagement} />
       <ProtectedRoute path="/backoffice/customers" component={CustomersManagement} />
+      <ProtectedRoute path="/backoffice/news" component={NewsManagement} />
+      <ProtectedRoute path="/backoffice/gallery" component={GalleryManagement} />
       <Route component={NotFound} />
     </Switch>
   );

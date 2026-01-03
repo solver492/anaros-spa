@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, X, MapPin, Phone, Clock, Instagram, Star, Sparkles, Scissors, 
-  Droplet, Heart, Palette, ShieldCheck, Gem, UserCheck, ChevronRight, 
+import {
+  Menu, X, MapPin, Phone, Clock, Instagram, Star, Sparkles, Scissors,
+  Droplet, Heart, Palette, ShieldCheck, Gem, UserCheck, ChevronRight,
   BookOpen, Layout, Users, Zap, Mail, ArrowUp, Send, Loader2, CheckCircle, ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
-import { useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import type { News, Gallery } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -99,7 +107,7 @@ const services = [
   }
 ];
 
-const galleryImages = [
+const staticGalleryImages = [
   "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwBjdptOS-x1r2ewMBm4N4oi1Zp1XYqTF9JoYt5SNU1O4BpbaOwhvKBrHaIEpUO3W04N951rkHlAga99YuSVCCsVRjXQ3CkjOmbv5zOPyn5JWbxomHBVlKTqNiUVTsq1HikBlZkc7EUGCk=s680-w680-h510-rw",
   "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwJU3ha3bEdXoHRhffCnER_sdomUjw3bovcTcDVNkideOX8JXmBmIPtJ-l3q-_p9C-6i25rE35-2QMxllxoalhneZsieuRauYHI-Qq1gcpC3nq9hw5vptowbCZS_D6-Vd3ugGVU=s680-w680-h510-rw",
   "https://lh3.googleusercontent.com/p/AF1QipPD4p7euESqNrvSRjR9BVSpc71lBQpborYMOyIf=s680-w680-h510-rw",
@@ -113,9 +121,9 @@ const galleryImages = [
   "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx3w68hDMc2YKIkg_d23lBytew43HdBBTNcCHoeaXYKF0Xoi8bCHJ0P0x_VbGel1UzWGlc3kDhbgzCwKlS0an3xj_yLSl2UUsXzbOS6C4e-rjruVGL2uXWFv8sBXXLfFp573vUd=s680-w680-h510-rw",
 ];
 
-const newsArticles = [
+const staticNewsArticles = [
   {
-    id: 1,
+    id: "s1",
     title: "Le Soin Hydrafacial Coréen Arrive chez Anaros",
     category: "Nouveau Soin",
     date: "10 Septembre 2025",
@@ -123,12 +131,12 @@ const newsArticles = [
     excerpt: "Découvrez la révolution du soin du visage ! Le protocole Hydrafacial, désormais disponible dans notre institut, offre un nettoyage, une exfoliation et une hydratation en profondeur pour une peau éclatante et sans imperfection."
   },
   {
-    id: 2,
+    id: "s2",
     title: "Renforcement du Partenariat avec Kérastase Paris",
     category: "Partenariat",
     date: "22 Août 2025",
     image: "https://images.unsplash.com/photo-1628172778817-0243e80f5549?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    excerpt: "Anaros est fier d'annoncer son statut de salon partenaire \"Prestige\" avec Kérastase. Cela nous permet de vous proposer des diagnostics capillaires ultra-précis et des gammes de soins exclusives."
+    excerpt: "Anaros est pied d'annoncer son statut de salon partenaire \"Prestige\" avec Kérastase. Cela nous permet de vous proposer des diagnostics capillaires ultra-précis et des gammes de soins exclusives."
   }
 ];
 
@@ -159,10 +167,10 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navClass = currentPage === 'home' 
+  const navClass = currentPage === 'home'
     ? (isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-3' : 'bg-transparent py-5')
     : 'bg-white shadow-md py-3';
-  
+
   const titleClass = currentPage === 'home' && !isScrolled
     ? 'text-white'
     : 'text-stone-800';
@@ -171,8 +179,8 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
     if (currentPage === id) {
       return 'bg-amber-600 text-white font-medium';
     }
-    return currentPage === 'home' && !isScrolled 
-      ? 'text-white/90 hover:text-white hover:bg-white/10' 
+    return currentPage === 'home' && !isScrolled
+      ? 'text-white/90 hover:text-white hover:bg-white/10'
       : 'text-stone-600 hover:text-amber-600 hover:bg-amber-50';
   };
 
@@ -180,9 +188,9 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
     <nav className={`fixed w-full z-50 transition-all duration-300 ${navClass}`} role="navigation" aria-label="Navigation principale">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-4">
-          <button 
+          <button
             type="button"
-            onClick={() => onNavigate('home')} 
+            onClick={() => onNavigate('home')}
             className={`flex items-center gap-3 transition-colors ${titleClass}`}
             aria-label="Retour à l'accueil ANAROS Beauty Lounge"
             data-testid="link-home-logo"
@@ -195,15 +203,15 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
               <span className="text-xs tracking-widest opacity-70">{SITE_SUBTITLE}</span>
             </div>
           </button>
-          
+
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-1" role="menubar">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
-                <button 
+                <button
                   type="button"
-                  key={item.id} 
+                  key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className={`text-xs uppercase tracking-widest transition-all flex items-center gap-2 px-4 py-2 rounded-full ${linkClass(item.id)}`}
                   aria-label={`Aller à ${item.name}`}
@@ -220,11 +228,11 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
-            <Button 
+            <Button
               type="button"
-              variant="ghost" 
+              variant="ghost"
               size="icon"
-              onClick={() => setIsMenuOpen(!isMenuOpen)} 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={titleClass}
               aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={isMenuOpen}
@@ -240,7 +248,7 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
+          <motion.div
             id="mobile-menu"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -253,9 +261,9 @@ function Navigation({ currentPage, onNavigate, isScrolled }: {
               {navigation.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button 
+                  <button
                     type="button"
-                    key={item.id} 
+                    key={item.id}
                     onClick={() => { onNavigate(item.id); setIsMenuOpen(false); }}
                     className="text-stone-600 uppercase tracking-widest text-sm py-3 px-4 rounded-lg flex items-center gap-3 hover:bg-stone-100 transition-colors"
                     role="menuitem"
@@ -281,7 +289,7 @@ function Footer() {
   return (
     <footer id="contact" className="bg-stone-50 pt-24 pb-12 border-t border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16"
           initial="hidden"
           whileInView="visible"
@@ -294,7 +302,7 @@ function Footer() {
             <ul className="space-y-4 text-stone-600">
               <li className="flex items-start justify-center md:justify-start gap-3">
                 <MapPin className="w-5 h-5 text-amber-600 mt-1 flex-shrink-0" />
-                <span>123 Boulevard des Martyrs<br/>Alger, Algérie</span>
+                <span>123 Boulevard des Martyrs<br />Alger, Algérie</span>
               </li>
               <li className="flex items-center justify-center md:justify-start gap-3">
                 <Phone className="w-5 h-5 text-amber-600 flex-shrink-0" />
@@ -361,47 +369,47 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
       {/* Hero Section */}
       <section className="relative h-screen">
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80" 
+          <img
+            src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80"
             alt="Intérieur spa luxueux ANAROS"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
         </div>
-        
-        <motion.div 
+
+        <motion.div
           className="relative max-w-7xl mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white pt-20"
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
         >
-          <motion.p 
+          <motion.p
             variants={fadeInUp}
             className="text-sm md:text-base uppercase tracking-[0.3em] mb-4 text-white/80"
           >
             Institut de Beauté & Bien-être
           </motion.p>
-          
-          <motion.h1 
+
+          <motion.h1
             variants={fadeInUp}
             className="text-5xl md:text-7xl lg:text-8xl font-serif mb-6"
           >
             Révélez votre éclat
           </motion.h1>
-          
-          <motion.div 
+
+          <motion.div
             variants={fadeInUp}
             className="w-24 h-0.5 bg-gradient-to-r from-transparent via-white/60 to-transparent mb-6"
           ></motion.div>
-          
-          <motion.p 
+
+          <motion.p
             variants={fadeInUp}
             className="max-w-2xl text-lg md:text-xl font-light text-white/90 mb-10 leading-relaxed"
           >
-            Plus qu'un institut, Anaros est une expérience sensorielle. 
+            Plus qu'un institut, Anaros est une expérience sensorielle.
             Coiffure, Spa, Esthétique : l'excellence au service de votre beauté.
           </motion.p>
-          
+
           <motion.div variants={fadeInUp}>
             <Button
               onClick={() => onNavigate('services')}
@@ -415,7 +423,7 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
         </motion.div>
 
         {/* Scroll indicator */}
-        <motion.div 
+        <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -428,7 +436,7 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
 
       {/* Philosophy Section */}
       <section className="py-24 bg-white">
-        <motion.div 
+        <motion.div
           className="max-w-4xl mx-auto px-4 text-center"
           initial="hidden"
           whileInView="visible"
@@ -442,7 +450,7 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
             L'Expérience Anaros
           </motion.h2>
           <motion.p variants={fadeInUp} className="text-stone-600 leading-loose text-lg font-light">
-            Bienvenue dans un sanctuaire dédié à la féminité. Chez Anaros, nous croyons que la beauté est un art qui se cultive. 
+            Bienvenue dans un sanctuaire dédié à la féminité. Chez Anaros, nous croyons que la beauté est un art qui se cultive.
             Notre équipe de spécialistes passionnées vous accueille dans un cadre raffiné, où chaque détail a été pensé pour votre apaisement.
             Des rituels ancestraux du hammam aux techniques modernes de l'Hydrafacial, nous allions tradition et innovation.
           </motion.p>
@@ -452,7 +460,7 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
       {/* Commitment Section */}
       <section className="py-24 bg-stone-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
@@ -462,8 +470,8 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
             <span className="text-sm font-bold uppercase tracking-widest text-amber-600 mb-2 block">Notre Promesse</span>
             <h3 className="text-4xl font-serif text-stone-800">Nos Engagements Qualité</h3>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
             initial="hidden"
             whileInView="visible"
@@ -492,29 +500,29 @@ function HomeView({ onNavigate }: { onNavigate: (id: string) => void }) {
 }
 
 // --- SERVICES VIEW ---
-function ServicesDetailView({ service, onBack }: { 
-  service: typeof services[0]; 
+function ServicesDetailView({ service, onBack }: {
+  service: typeof services[0];
   onBack: () => void;
 }) {
   const Icon = service.icon;
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}
     >
-      <motion.button 
+      <motion.button
         variants={fadeInUp}
-        onClick={onBack} 
+        onClick={onBack}
         className="flex items-center gap-2 text-stone-600 hover:text-amber-600 transition-colors mb-8"
         data-testid="button-back-services"
       >
-        <ChevronRight className="w-4 h-4 transform rotate-180" /> 
+        <ChevronRight className="w-4 h-4 transform rotate-180" />
         Retour au menu des services
       </motion.button>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <motion.div variants={fadeInUp}>
           <div className="flex items-center gap-3 mb-4">
@@ -529,8 +537,8 @@ function ServicesDetailView({ service, onBack }: {
           <h4 className="text-xl font-serif text-stone-800 mb-4">Prestations Clés</h4>
           <ul className="space-y-3">
             {service.details.map((detail, idx) => (
-              <motion.li 
-                key={idx} 
+              <motion.li
+                key={idx}
                 className="text-stone-600 flex items-center gap-3"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -541,22 +549,22 @@ function ServicesDetailView({ service, onBack }: {
               </motion.li>
             ))}
           </ul>
-          
-          <Button 
+
+          <Button
             className="mt-8 bg-amber-600 hover:bg-amber-700 text-white px-8"
             data-testid="button-book-service"
           >
             Prendre Rendez-vous
           </Button>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           variants={scaleIn}
           className="rounded-lg overflow-hidden shadow-2xl"
         >
-          <img 
-            src={service.image} 
-            alt={service.title} 
+          <img
+            src={service.image}
+            alt={service.title}
             className="w-full h-full object-cover min-h-[400px]"
           />
         </motion.div>
@@ -578,7 +586,7 @@ function ServicesView() {
   return (
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16 pt-8"
           initial="hidden"
           whileInView="visible"
@@ -589,7 +597,7 @@ function ServicesView() {
           <h3 className="text-4xl font-serif text-stone-800">Explorez nos Univers</h3>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           initial="hidden"
           whileInView="visible"
@@ -600,7 +608,7 @@ function ServicesView() {
             const Icon = service.icon;
             return (
               <motion.div key={index} variants={scaleIn}>
-                <Card 
+                <Card
                   className="group cursor-pointer flex flex-col items-center text-center p-6 border-2 border-stone-200 hover:border-amber-600 hover:bg-amber-600 transition-all duration-300 h-full overflow-visible"
                   onClick={() => setCurrentService(service.id)}
                   data-testid={`card-service-${service.id}`}
@@ -629,6 +637,10 @@ function ServicesView() {
 
 // --- GALLERY VIEW ---
 function GalleryView() {
+  const { data: dynamicGallery } = useQuery<Gallery[]>({
+    queryKey: ["/api/gallery"],
+  });
+
   useEffect(() => {
     // Recharger le script Instagram pour afficher l'embed
     if (window.instgrm) {
@@ -636,10 +648,23 @@ function GalleryView() {
     }
   }, []);
 
+  const [selectedImage, setSelectedImage] = useState<Gallery | null>(null);
+
+  const filteredItems = dynamicGallery?.filter(item => item.published) || [];
+
+  const displayItems = filteredItems.length > 0
+    ? filteredItems
+    : staticGalleryImages.map((url, i) => ({
+      id: `static-${i}`,
+      imageUrl: url,
+      caption: "Notre institut ANAROS",
+      published: true
+    } as Gallery));
+
   return (
-    <section className="py-24 bg-stone-100">
+    <section className="py-24 bg-stone-100" id="gallery">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16 pt-8"
           initial="hidden"
           whileInView="visible"
@@ -654,7 +679,7 @@ function GalleryView() {
         </motion.div>
 
         {/* Carrousel de vidéos des réseaux sociaux */}
-        <motion.div 
+        <motion.div
           className="max-w-4xl mx-auto mb-16 px-12"
           initial="hidden"
           whileInView="visible"
@@ -667,35 +692,35 @@ function GalleryView() {
               <CarouselItem>
                 <Card className="p-4 bg-white border-none shadow-xl">
                   <div className="flex justify-center">
-                    <blockquote 
-                      className="instagram-media" 
-                      data-instgrm-captioned 
-                      data-instgrm-permalink="https://www.instagram.com/reel/DRu0NmQjHnI/?utm_source=ig_embed&amp;utm_campaign=loading" 
-                      data-instgrm-version="14" 
-                      style={{ 
-                        background: '#FFF', 
-                        border: 0, 
-                        borderRadius: '3px', 
-                        boxShadow: '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)', 
-                        margin: '1px', 
-                        maxWidth: '540px', 
-                        minWidth: '326px', 
-                        padding: 0, 
-                        width: '99.375%' 
+                    <blockquote
+                      className="instagram-media"
+                      data-instgrm-captioned
+                      data-instgrm-permalink="https://www.instagram.com/reel/DRu0NmQjHnI/?utm_source=ig_embed&amp;utm_campaign=loading"
+                      data-instgrm-version="14"
+                      style={{
+                        background: '#FFF',
+                        border: 0,
+                        borderRadius: '3px',
+                        boxShadow: '0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)',
+                        margin: '1px',
+                        maxWidth: '540px',
+                        minWidth: '326px',
+                        padding: 0,
+                        width: '99.375%'
                       }}
                     >
                       <div style={{ padding: '16px' }}>
-                        <a 
-                          href="https://www.instagram.com/reel/DRu0NmQjHnI/?utm_source=ig_embed&amp;utm_campaign=loading" 
-                          style={{ 
-                            background: '#FFFFFF', 
-                            lineHeight: 0, 
-                            padding: '0 0', 
-                            textAlign: 'center', 
-                            textDecoration: 'none', 
-                            width: '100%' 
-                          }} 
-                          target="_blank" 
+                        <a
+                          href="https://www.instagram.com/reel/DRu0NmQjHnI/?utm_source=ig_embed&amp;utm_campaign=loading"
+                          style={{
+                            background: '#FFFFFF',
+                            lineHeight: 0,
+                            padding: '0 0',
+                            textAlign: 'center',
+                            textDecoration: 'none',
+                            width: '100%'
+                          }}
+                          target="_blank"
                           rel="noopener noreferrer"
                         >
                           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -736,14 +761,14 @@ function GalleryView() {
               <CarouselItem>
                 <Card className="p-4 bg-white border-none shadow-xl">
                   <div className="flex justify-center items-center min-h-[600px]">
-                    <iframe 
-                      src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1202219961864173%2F&show_text=true&width=267&t=0" 
-                      width="267" 
-                      height="591" 
-                      style={{ border: 'none', overflow: 'hidden' }} 
-                      scrolling="no" 
-                      frameBorder="0" 
-                      allowFullScreen={true} 
+                    <iframe
+                      src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1202219961864173%2F&show_text=true&width=267&t=0"
+                      width="267"
+                      height="591"
+                      style={{ border: 'none', overflow: 'hidden' }}
+                      scrolling="no"
+                      frameBorder="0"
+                      allowFullScreen={true}
                       allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                       title="Vidéo ANAROS sur Facebook - 1"
                     />
@@ -755,14 +780,14 @@ function GalleryView() {
               <CarouselItem>
                 <Card className="p-4 bg-white border-none shadow-xl">
                   <div className="flex justify-center items-center min-h-[600px]">
-                    <iframe 
-                      src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F813857321225549%2F&show_text=false&width=267&t=0" 
-                      width="267" 
-                      height="476" 
-                      style={{ border: 'none', overflow: 'hidden' }} 
-                      scrolling="no" 
-                      frameBorder="0" 
-                      allowFullScreen={true} 
+                    <iframe
+                      src="https://www.facebook.com/plugins/video.php?height=476&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F813857321225549%2F&show_text=false&width=267&t=0"
+                      width="267"
+                      height="476"
+                      style={{ border: 'none', overflow: 'hidden' }}
+                      scrolling="no"
+                      frameBorder="0"
+                      allowFullScreen={true}
                       allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                       title="Vidéo ANAROS sur Facebook - 2"
                     />
@@ -774,51 +799,99 @@ function GalleryView() {
             <CarouselNext className="right-0" />
           </Carousel>
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={staggerContainer}
         >
-          {galleryImages.map((src, index) => (
-            <motion.div 
-              key={index} 
+          {displayItems.map((item, index) => (
+            <motion.div
+              key={item.id}
               variants={scaleIn}
-              className="aspect-square overflow-hidden rounded-lg shadow-lg group cursor-pointer"
-              data-testid={`gallery-image-${index}`}
+              className="aspect-square overflow-hidden rounded-lg shadow-lg group cursor-pointer relative"
+              onClick={() => setSelectedImage(item)}
             >
-              <img 
-                src={src} 
-                alt={`Institut Anaros - Image ${index + 1}`}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              <img
+                src={item.imageUrl}
+                alt={item.caption || ""}
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
+              <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                <p className="text-white text-sm font-serif italic line-clamp-2">{item.caption}</p>
+              </div>
             </motion.div>
           ))}
         </motion.div>
-        
-        <motion.div 
+
+        {/* Lightbox / Modal de détails */}
+        <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+          <DialogContent className="max-w-3xl p-0 overflow-hidden border-none bg-stone-900/95 backdrop-blur-xl">
+            <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
+              <div className="md:w-2/3 bg-black flex items-center justify-center">
+                <img
+                  src={selectedImage?.imageUrl}
+                  alt={selectedImage?.caption || ""}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+              <div className="md:w-1/3 p-8 flex flex-col justify-center bg-stone-900 text-white">
+                <DialogHeader className="mb-6">
+                  <DialogTitle className="text-3xl font-serif text-amber-500 mb-2">
+                    Détails du soin
+                  </DialogTitle>
+                  <DialogDescription className="text-stone-400 text-lg font-light leading-relaxed">
+                    {selectedImage?.caption || "Explorez l'univers ANAROS Beauty Lounge à travers nos réalisations."}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="h-px bg-stone-800 w-full" />
+                  <div className="flex items-center gap-3 text-stone-300">
+                    <Sparkles className="h-5 w-5 text-amber-500" />
+                    <span>Réalisé par nos expertes</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-stone-300">
+                    <MapPin className="h-5 w-5 text-amber-500" />
+                    <span>ANAROS Beauty Lounge, Alger</span>
+                  </div>
+                </div>
+                <Button
+                  className="mt-8 bg-amber-600 hover:bg-amber-700 text-white border-none h-12 rounded-full"
+                  onClick={() => {
+                    setSelectedImage(null);
+                    window.location.hash = "contact";
+                  }}
+                >
+                  Réserver un soin similaire
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <motion.div
           className="text-center mt-12"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
         >
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <a 
-              href="https://www.instagram.com/anaros.institut/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://www.instagram.com/anaros.institut/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm uppercase tracking-widest text-amber-600 hover:text-amber-700 transition-colors font-medium"
               data-testid="link-instagram"
             >
               <Instagram className="w-5 h-5" />
               Suivez-nous sur Instagram
             </a>
-            <a 
-              href="https://www.facebook.com/anarosinstitut/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://www.facebook.com/anarosinstitut/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm uppercase tracking-widest text-amber-600 hover:text-amber-700 transition-colors font-medium"
               data-testid="link-facebook"
             >
@@ -839,7 +912,7 @@ function AboutView() {
   return (
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16 pt-8"
           initial="hidden"
           whileInView="visible"
@@ -849,22 +922,22 @@ function AboutView() {
           <span className="text-sm font-bold uppercase tracking-widest text-amber-600 mb-2 block">Notre Histoire</span>
           <h3 className="text-4xl font-serif text-stone-800">À Propos d'Anaros</h3>
         </motion.div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <motion.div 
+          <motion.div
             className="rounded-lg overflow-hidden shadow-2xl"
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <img 
-              src="https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyxi-FahMKnMk5kh1qr2fffqANJpwWjriuoY5axI-pMwO3ghw-QPr1uZ6Arc7Ma0VYca33wSW9TgE5qzSZXjQxSxGCUn6sTMJAkDdEW8tJX7oI44-55COoX9uidw0ieh_5rG7Ac9Q=s680-w680-h510-rw" 
+            <img
+              src="https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyxi-FahMKnMk5kh1qr2fffqANJpwWjriuoY5axI-pMwO3ghw-QPr1uZ6Arc7Ma0VYca33wSW9TgE5qzSZXjQxSxGCUn6sTMJAkDdEW8tJX7oI44-55COoX9uidw0ieh_5rG7Ac9Q=s680-w680-h510-rw"
               alt="Accueil Institut Anaros"
               className="w-full h-full object-cover min-h-[400px]"
             />
           </motion.div>
-          
+
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -880,20 +953,20 @@ function AboutView() {
             <motion.p variants={fadeInUp} className="text-stone-600 leading-relaxed mb-8">
               Nous sommes fiers d'être devenus une référence en matière de beauté et de soins en Algérie.
             </motion.p>
-            
+
             <motion.h4 variants={fadeInUp} className="text-2xl font-serif text-stone-800 mb-4">
               Notre Équipe, Notre Force
             </motion.h4>
             <motion.p variants={fadeInUp} className="text-stone-600 mb-8">
               Notre équipe est composée de professionnelles passionnées, chacune experte dans son domaine. Nous investissons constamment dans la formation et les technologies pour vous garantir les meilleurs résultats.
             </motion.p>
-            
-            <motion.div 
+
+            <motion.div
               className="grid grid-cols-2 gap-4"
               variants={staggerContainer}
             >
               {team.map((member, index) => (
-                <motion.div 
+                <motion.div
                   key={index}
                   variants={scaleIn}
                   className="flex items-center gap-3 p-3 bg-stone-50 rounded-lg"
@@ -918,10 +991,34 @@ function AboutView() {
 
 // --- NEWS VIEW ---
 function NewsView() {
+  const { data: dynamicNews, isLoading, error } = useQuery<News[]>({
+    queryKey: ["/api/news"],
+  });
+
+  useEffect(() => {
+    console.log("NewsView - dynamicNews:", dynamicNews);
+    if (error) console.error("NewsView - Query Error:", error);
+  }, [dynamicNews, error]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 bg-stone-100">
+        <Loader2 className="h-12 w-12 text-amber-600 animate-spin" />
+      </div>
+    );
+  }
+
+  const filteredNews = dynamicNews?.filter(article => article.published) || [];
+
+  // LOGIQUE DE DÉPANNAGE : On s'assure d'avoir au moins quelque chose à afficher
+  const displayNews = filteredNews.length > 0 ? filteredNews : staticNewsArticles;
+
+  console.log("NewsView - displayNews:", displayNews);
+
   return (
     <section className="py-24 bg-stone-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-16 pt-8"
           initial="hidden"
           whileInView="visible"
@@ -929,47 +1026,64 @@ function NewsView() {
           variants={fadeInUp}
         >
           <span className="text-sm font-bold uppercase tracking-widest text-amber-600 mb-2 block">Nouveautés</span>
-          <h3 className="text-4xl font-serif text-stone-800">Actualités & Événements</h3>
+          <h3 className="text-4xl font-serif text-stone-800">Nos Actualités & Événements</h3>
           <p className="mt-4 text-stone-600 font-light max-w-2xl mx-auto">
             Restez informés de nos nouveaux soins, technologies et événements exclusifs.
           </p>
         </motion.div>
 
-        <motion.div 
-          className="space-y-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
+        <motion.div
+          className="grid grid-cols-1 gap-12"
+          initial="visible"
+          animate="visible"
           variants={staggerContainer}
         >
-          {newsArticles.map((article) => (
+          {displayNews.map((article) => (
             <motion.div key={article.id} variants={fadeInUp}>
-              <Card className="p-0 overflow-hidden border-none shadow-lg">
+              <Card className="p-0 overflow-hidden border-none shadow-lg group hover:shadow-2xl transition-all duration-500">
                 <div className="flex flex-col md:flex-row">
-                  <div className="w-full md:w-1/3 h-48 md:h-auto overflow-hidden flex-shrink-0">
-                    <img 
-                      src={article.image} 
+                  <div className="w-full md:w-1/3 h-64 md:h-auto overflow-hidden flex-shrink-0 relative">
+                    <img
+                      src={article.image || "https://images.unsplash.com/photo-1627914445839-813e31649988?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"}
                       alt={article.title}
-                      className="w-full h-full object-cover min-h-[200px]"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-amber-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                        {article.category}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex-1 p-6">
-                    <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
-                      {article.category} | {article.date}
-                    </span>
-                    <h4 className="text-2xl font-serif text-stone-800 mt-2 mb-3">{article.title}</h4>
-                    <p className="text-stone-600 mb-4">{article.excerpt}</p>
-                    <button 
-                      className="flex items-center gap-1 text-sm text-stone-800 hover:text-amber-600 font-medium transition-colors"
-                      data-testid={`link-news-${article.id}`}
-                    >
-                      Lire la suite <ChevronRight className="w-3 h-3" />
-                    </button>
+                  <div className="flex-1 p-8 bg-white flex flex-col justify-center">
+                    <div className="flex items-center gap-2 text-stone-400 text-xs mb-4">
+                      <Clock className="w-3 h-3" />
+                      <span>Publié le {article.date}</span>
+                    </div>
+                    <h4 className="text-3xl font-serif text-stone-800 mb-4 group-hover:text-amber-600 transition-colors">
+                      {article.title}
+                    </h4>
+                    <p className="text-stone-600 leading-relaxed mb-6 font-light">
+                      {article.excerpt}
+                    </p>
+                    <div className="mt-auto">
+                      <button
+                        className="flex items-center gap-2 text-sm text-amber-600 font-bold uppercase tracking-wider group/btn"
+                        data-testid={`link-news-${article.id}`}>
+
+
+                        <ChevronRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </Card>
             </motion.div>
           ))}
+          {displayNews.length === 0 && (
+            <div className="text-center py-20 text-stone-400 italic font-serif">
+              Aucune actualité n'est disponible pour le moment.
+            </div>
+          )}
         </motion.div>
       </div>
     </section>
@@ -980,7 +1094,7 @@ function NewsView() {
 function ContactView() {
   const { toast } = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
-  
+
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -1040,7 +1154,7 @@ function ContactView() {
             <p className="text-stone-600 mb-8 text-lg">
               Notre équipe vous contactera dans les plus brefs délais.
             </p>
-            <Button 
+            <Button
               onClick={() => setIsSubmitted(false)}
               variant="outline"
               className="border-amber-600 text-amber-600 hover:bg-amber-50"
@@ -1057,7 +1171,7 @@ function ContactView() {
   return (
     <section className="py-24 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
+        <motion.div
           className="text-center mb-12 pt-8"
           initial="hidden"
           animate="visible"
@@ -1079,7 +1193,7 @@ function ContactView() {
           >
             <Card className="p-8 h-full bg-stone-50 border-none">
               <h4 className="text-2xl font-serif text-stone-800 mb-6">Informations</h4>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1087,7 +1201,7 @@ function ContactView() {
                   </div>
                   <div>
                     <h5 className="font-medium text-stone-800 mb-1">Adresse</h5>
-                    <p className="text-stone-600">123 Boulevard des Martyrs<br/>Alger, Algérie</p>
+                    <p className="text-stone-600">123 Boulevard des Martyrs<br />Alger, Algérie</p>
                   </div>
                 </div>
 
@@ -1117,7 +1231,7 @@ function ContactView() {
                   </div>
                   <div>
                     <h5 className="font-medium text-stone-800 mb-1">Horaires</h5>
-                    <p className="text-stone-600">Samedi - Jeudi: 09:00 - 19:00<br/>Fermé le Vendredi</p>
+                    <p className="text-stone-600">Samedi - Jeudi: 09:00 - 19:00<br />Fermé le Vendredi</p>
                   </div>
                 </div>
               </div>
@@ -1125,9 +1239,9 @@ function ContactView() {
               <div className="mt-8 pt-6 border-t border-stone-200">
                 <h5 className="font-medium text-stone-800 mb-4">Suivez-nous</h5>
                 <div className="space-y-3">
-                  <a 
-                    href="https://www.instagram.com/anaros.institut/" 
-                    target="_blank" 
+                  <a
+                    href="https://www.instagram.com/anaros.institut/"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 transition-colors"
                     data-testid="link-instagram-contact"
@@ -1136,9 +1250,9 @@ function ContactView() {
                     @anaros.institut
                   </a>
                   <br />
-                  <a 
-                    href="https://www.facebook.com/anarosinstitut/" 
-                    target="_blank" 
+                  <a
+                    href="https://www.facebook.com/anarosinstitut/"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 transition-colors"
                     data-testid="link-facebook-contact"
@@ -1155,13 +1269,13 @@ function ContactView() {
               <div className="mt-8 pt-6 border-t border-stone-200">
                 <h5 className="font-medium text-stone-800 mb-4">Nous Trouver</h5>
                 <div className="rounded-lg overflow-hidden shadow-md">
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d799.1762157391818!2d2.9949676999999997!3d36.7536547!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128fb1bb86fbd45d%3A0x5e401253e70e89f5!2sANAROS%20Institut!5e0!3m2!1sfr!2sfr!4v1764664761790!5m2!1sfr!2sfr" 
-                    width="100%" 
-                    height="250" 
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d799.1762157391818!2d2.9949676999999997!3d36.7536547!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128fb1bb86fbd45d%3A0x5e401253e70e89f5!2sANAROS%20Institut!5e0!3m2!1sfr!2sfr!4v1764664761790!5m2!1sfr!2sfr"
+                    width="100%"
+                    height="250"
                     style={{ border: 0 }}
                     allowFullScreen
-                    loading="lazy" 
+                    loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     title="Localisation ANAROS Institut sur Google Maps"
                     data-testid="map-google-embed"
@@ -1178,8 +1292,8 @@ function ContactView() {
             transition={{ duration: 0.5, delay: 0.3 }}
           >
             <Card className="p-8 border-none shadow-lg">
-              <form 
-                onSubmit={handleSubmit(onSubmit)} 
+              <form
+                onSubmit={handleSubmit(onSubmit)}
                 className="space-y-6"
                 aria-label="Formulaire de contact"
                 noValidate
@@ -1272,7 +1386,7 @@ function ContactView() {
                   )}
                 </div>
 
-                <Button 
+                <Button
                   type="submit"
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white py-6"
                   disabled={contactMutation.isPending}
@@ -1310,8 +1424,8 @@ function TestimonialsSection() {
           backgroundSize: '40px 40px'
         }}></div>
       </div>
-      
-      <motion.div 
+
+      <motion.div
         className="max-w-4xl mx-auto px-4 text-center relative z-10"
         initial="hidden"
         whileInView="visible"
@@ -1323,11 +1437,11 @@ function TestimonialsSection() {
             <Star key={star} className="w-5 h-5 text-amber-400 fill-amber-400" />
           ))}
         </motion.div>
-        
+
         <motion.blockquote variants={fadeInUp} className="text-2xl md:text-3xl font-serif italic leading-relaxed mb-8">
           "Un moment hors du temps. L'équipe est d'un professionnalisme rare et le cadre est tout simplement somptueux. Je recommande le soin Hydrafacial les yeux fermés."
         </motion.blockquote>
-        
+
         <motion.cite variants={fadeInUp} className="not-italic text-stone-400 uppercase tracking-widest text-sm">
           - Une cliente fidèle
         </motion.cite>
@@ -1411,12 +1525,12 @@ export default function Home() {
 
   return (
     <div className="font-sans text-stone-800 bg-stone-50 min-h-screen">
-      <Navigation 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
-        isScrolled={isScrolled} 
+      <Navigation
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        isScrolled={isScrolled}
       />
-      
+
       <main className={currentPage !== 'home' ? 'pt-20' : ''}>
         <AnimatePresence mode="wait">
           <motion.div

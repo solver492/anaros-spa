@@ -20,6 +20,12 @@ import {
   customers,
   orders,
   orderItems,
+  news,
+  gallery,
+  type News,
+  type InsertNews,
+  type Gallery,
+  type InsertGallery,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -75,6 +81,18 @@ export interface IStorage {
   // Order Items
   getOrderItems(orderId: string): Promise<OrderItem[]>;
   createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
+
+  // News
+  getNews(): Promise<News[]>;
+  createNews(news: InsertNews): Promise<News>;
+  updateNews(id: string, news: Partial<InsertNews>): Promise<News | undefined>;
+  deleteNews(id: string): Promise<boolean>;
+
+  // Gallery
+  getGallery(): Promise<Gallery[]>;
+  createGalleryItem(item: InsertGallery): Promise<Gallery>;
+  updateGalleryItem(id: string, item: Partial<InsertGallery>): Promise<Gallery | undefined>;
+  deleteGalleryItem(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -289,6 +307,68 @@ export class DatabaseStorage implements IStorage {
   async createOrderItem(insertItem: InsertOrderItem): Promise<OrderItem> {
     const [item] = await db.insert(orderItems).values(insertItem).returning();
     return item;
+  }
+
+  // ============================================
+  // NEWS
+  // ============================================
+
+  async getNews(): Promise<News[]> {
+    return await db.select().from(news).orderBy(desc(news.createdAt));
+  }
+
+  async createNews(insertNews: InsertNews): Promise<News> {
+    const [article] = await db
+      .insert(news)
+      .values(insertNews as any)
+      .returning();
+    return article as News;
+  }
+
+  async updateNews(id: string, updates: Partial<InsertNews>): Promise<News | undefined> {
+    const [article] = await db
+      .update(news)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(news.id, id))
+      .returning();
+    if (article) article.id = String(article.id);
+    return article;
+  }
+
+  async deleteNews(id: string): Promise<boolean> {
+    const [deleted] = await db.delete(news).where(eq(news.id, id)).returning();
+    return !!deleted;
+  }
+
+  // ============================================
+  // GALLERY
+  // ============================================
+
+  async getGallery(): Promise<Gallery[]> {
+    return await db.select().from(gallery).orderBy(gallery.displayOrder);
+  }
+
+  async createGalleryItem(insertItem: InsertGallery): Promise<Gallery> {
+    const [item] = await db
+      .insert(gallery)
+      .values(insertItem as any)
+      .returning();
+    return item as Gallery;
+  }
+
+  async updateGalleryItem(id: string, updates: Partial<InsertGallery>): Promise<Gallery | undefined> {
+    const [item] = await db
+      .update(gallery)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(gallery.id, id))
+      .returning();
+    if (item) item.id = String(item.id);
+    return item;
+  }
+
+  async deleteGalleryItem(id: string): Promise<boolean> {
+    const [deleted] = await db.delete(gallery).where(eq(gallery.id, id)).returning();
+    return !!deleted;
   }
 }
 

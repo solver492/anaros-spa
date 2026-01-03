@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertContactSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { registerShopRoutes } from "./shop-routes";
+import { registerCmsRoutes } from "./cms-routes";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(
@@ -15,6 +16,10 @@ export async function registerRoutes(
 
   // Register shop routes
   registerShopRoutes(app);
+
+  // Register CMS routes (News & Gallery)
+  console.log("Registering CMS routes...");
+  registerCmsRoutes(app);
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {

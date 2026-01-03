@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingCart, Users, TrendingUp, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Package, ShoppingCart, Users, TrendingUp, AlertCircle, Zap, Palette } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 
@@ -54,9 +55,9 @@ export default function BackOfficeDashboard() {
                             </p>
                         </div>
                         <Link href="/">
-                            <a className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                            <Button variant="ghost" className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
                                 Retour au site
-                            </a>
+                            </Button>
                         </Link>
                     </div>
                 </div>
@@ -140,67 +141,87 @@ export default function BackOfficeDashboard() {
                 {/* Navigation Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     <Link href="/backoffice/products">
-                        <a className="block group">
-                            <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-purple-500">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-xl group-hover:text-purple-600 transition-colors">
-                                        <Package className="h-6 w-6" />
-                                        Gestion des Produits
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Ajouter, modifier et supprimer des produits
-                                    </CardDescription>
-                                </CardHeader>
-                            </Card>
-                        </a>
+                        <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-purple-500 cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl group-hover:text-purple-600 transition-colors">
+                                    <Package className="h-6 w-6" />
+                                    Gestion des Produits
+                                </CardTitle>
+                                <CardDescription>
+                                    Ajouter, modifier et supprimer des produits
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
                     </Link>
 
                     <Link href="/backoffice/categories">
-                        <a className="block group">
-                            <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-blue-500">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-xl group-hover:text-blue-600 transition-colors">
-                                        <Package className="h-6 w-6" />
-                                        Gestion des Catégories
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Organiser les produits par catégories
-                                    </CardDescription>
-                                </CardHeader>
-                            </Card>
-                        </a>
+                        <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-blue-500 cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl group-hover:text-blue-600 transition-colors">
+                                    <Package className="h-6 w-6" />
+                                    Gestion des Catégories
+                                </CardTitle>
+                                <CardDescription>
+                                    Organiser les produits par catégories
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
                     </Link>
 
                     <Link href="/backoffice/orders">
-                        <a className="block group">
-                            <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-500">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-xl group-hover:text-green-600 transition-colors">
-                                        <ShoppingCart className="h-6 w-6" />
-                                        Gestion des Commandes
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Suivre et gérer les commandes clients
-                                    </CardDescription>
-                                </CardHeader>
-                            </Card>
-                        </a>
+                        <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-green-500 cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl group-hover:text-green-600 transition-colors">
+                                    <ShoppingCart className="h-6 w-6" />
+                                    Gestion des Commandes
+                                </CardTitle>
+                                <CardDescription>
+                                    Suivre et gérer les commandes clients
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
                     </Link>
 
                     <Link href="/backoffice/customers">
-                        <a className="block group">
-                            <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-orange-500">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2 text-xl group-hover:text-orange-600 transition-colors">
-                                        <Users className="h-6 w-6" />
-                                        Gestion des Clients
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Voir et gérer les informations clients
-                                    </CardDescription>
-                                </CardHeader>
-                            </Card>
-                        </a>
+                        <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-orange-500 cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl group-hover:text-orange-600 transition-colors">
+                                    <Users className="h-6 w-6" />
+                                    Gestion des Clients
+                                </CardTitle>
+                                <CardDescription>
+                                    Voir et gérer les informations clients
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </Link>
+
+                    <Link href="/backoffice/news">
+                        <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-amber-500 cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl group-hover:text-amber-600 transition-colors">
+                                    <Zap className="h-6 w-6" />
+                                    Actualités & Événements
+                                </CardTitle>
+                                <CardDescription>
+                                    Gérer les annonces et événements
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </Link>
+
+                    <Link href="/backoffice/gallery">
+                        <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-pink-500 cursor-pointer">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-xl group-hover:text-pink-600 transition-colors">
+                                    <Palette className="h-6 w-6" />
+                                    Gestion de la Galerie
+                                </CardTitle>
+                                <CardDescription>
+                                    Gérer les images et vidéos de l'institut
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
                     </Link>
                 </div>
 
