@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, ShoppingCart, Users, TrendingUp, AlertCircle, Zap, Palette } from "lucide-react";
+import { Package, ShoppingCart, Users, TrendingUp, AlertCircle, Zap, Palette, Settings } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 
@@ -32,6 +35,21 @@ export default function BackOfficeDashboard() {
         queryKey: ["/api/shop/stats"],
     });
 
+    const queryClient = useQueryClient();
+
+    const { data: snowSetting } = useQuery({
+        queryKey: ["/api/settings/snow_effect"],
+    });
+
+    const { mutate: updateSetting } = useMutation({
+        mutationFn: async (value: boolean) => {
+            await apiRequest("POST", "/api/settings", { key: "snow_effect", value: String(value) });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["/api/settings/snow_effect"] });
+        }
+    });
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -41,9 +59,9 @@ export default function BackOfficeDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900" >
             {/* Header */}
-            <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+            < header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50" >
                 <div className="container mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -61,7 +79,7 @@ export default function BackOfficeDashboard() {
                         </Link>
                     </div>
                 </div>
-            </header>
+            </header >
 
             <div className="container mx-auto px-6 py-8">
                 {/* Stats Cards */}
@@ -225,6 +243,33 @@ export default function BackOfficeDashboard() {
                     </Link>
                 </div>
 
+                {/* Configuration Section */}
+                <div className="mb-8">
+                    <Card className="hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-slate-500">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-xl group-hover:text-slate-600 transition-colors">
+                                <Settings className="h-6 w-6" />
+                                Configuration du Site
+                            </CardTitle>
+                            <CardDescription>
+                                Paramètres généraux de l'application
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                <div className="space-y-0.5">
+                                    <span className="text-base font-medium text-slate-900 dark:text-slate-100">Effet Neige Réaliste</span>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Activer l'animation de neige sur l'ensemble du site.</p>
+                                </div>
+                                <Switch
+                                    checked={snowSetting?.value === "true"}
+                                    onCheckedChange={(checked) => updateSetting(checked)}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
                 {/* Recent Orders & Low Stock */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Recent Orders */}
@@ -302,6 +347,6 @@ export default function BackOfficeDashboard() {
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

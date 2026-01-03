@@ -65,5 +65,33 @@ export async function registerRoutes(
     }
   });
 
+  // Settings API
+  app.get("/api/settings/:key", async (req, res) => {
+    try {
+      const setting = await storage.getSetting(req.params.key);
+      return res.json(setting || { key: req.params.key, value: null });
+    } catch (error) {
+      console.error(`Error fetching setting ${req.params.key}:`, error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  app.post("/api/settings", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      const { key, value } = req.body;
+      if (!key || value === undefined) {
+        return res.status(400).json({ error: "Key and value are required" });
+      }
+      const setting = await storage.setSetting(key, String(value));
+      return res.json(setting);
+    } catch (error) {
+      console.error("Error updating setting:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   return httpServer;
 }

@@ -26,6 +26,9 @@ import {
   type InsertNews,
   type Gallery,
   type InsertGallery,
+  settings,
+  type Setting,
+  type InsertSettings,
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -93,6 +96,11 @@ export interface IStorage {
   createGalleryItem(item: InsertGallery): Promise<Gallery>;
   updateGalleryItem(id: string, item: Partial<InsertGallery>): Promise<Gallery | undefined>;
   deleteGalleryItem(id: string): Promise<boolean>;
+
+  // Settings
+  getSettings(): Promise<Setting[]>;
+  getSetting(key: string): Promise<Setting | undefined>;
+  setSetting(key: string, value: string): Promise<Setting>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -369,6 +377,38 @@ export class DatabaseStorage implements IStorage {
   async deleteGalleryItem(id: string): Promise<boolean> {
     const [deleted] = await db.delete(gallery).where(eq(gallery.id, id)).returning();
     return !!deleted;
+  }
+
+  // ============================================
+  // SETTINGS
+  // ============================================
+
+  async getSettings(): Promise<Setting[]> {
+    return await db.select().from(settings);
+  }
+
+  async getSetting(key: string): Promise<Setting | undefined> {
+    const [setting] = await db.select().from(settings).where(eq(settings.key, key));
+    return setting;
+  }
+
+  async setSetting(key: string, value: string): Promise<Setting> {
+    const [existing] = await db.select().from(settings).where(eq(settings.key, key));
+
+    if (existing) {
+      const [updated] = await db
+        .update(settings)
+        .set({ value, updatedAt: new Date() })
+        .where(eq(settings.key, key))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(settings)
+        .values({ key, value })
+        .returning();
+      return created;
+    }
   }
 }
 

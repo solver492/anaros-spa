@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { CartProvider } from "@/hooks/use-cart";
 import { CartDrawer } from "@/components/cart-drawer";
 import { FloatingCart } from "@/components/floating-cart";
+import { SnowEffect } from "@/components/snow-effect";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
@@ -44,6 +45,7 @@ function App() {
           <Router />
           <CartDrawer />
           <FloatingCart />
+          <SnowEffect />
         </TooltipProvider>
       </CartProvider>
     </QueryClientProvider>

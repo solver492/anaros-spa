@@ -233,3 +233,19 @@ export const insertGallerySchema = createInsertSchema(gallery).omit({
 
 export type InsertGallery = z.infer<typeof insertGallerySchema>;
 export type Gallery = typeof gallery.$inferSelect;
+
+// Settings
+export const settings = pgTable("settings", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(), // Storing as string, can be JSON or boolean stringified
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertSettingsSchema = createInsertSchema(settings).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export type InsertSettings = z.infer<typeof insertSettingsSchema>;
+export type Setting = typeof settings.$inferSelect;
