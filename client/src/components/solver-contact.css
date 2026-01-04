@@ -1,0 +1,376 @@
+/* Pepsized 3D Contact Form Port */
+@import url('https://fonts.googleapis.com/css2?family=Satisfy&display=swap');
+
+.solver-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    /* Let clicks pass through overlay unless on the form */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Satisfy', cursive;
+}
+
+.solver-container {
+    position: relative;
+    width: 600px;
+    height: 300px;
+    perspective: 1000px;
+    pointer-events: auto;
+    z-index: 1001;
+}
+
+/* The Close 'X' for the modal */
+.solver-close-modal {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    padding: 5px;
+    transition: background 0.3s;
+}
+
+.solver-close-modal:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* Main Flip (Envelope Front vs Back) */
+.solver-form {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.7s;
+}
+
+.solver-form.flipped {
+    transform: rotateY(180deg);
+}
+
+.solver-form .front,
+.solver-form .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    background-color: #fbf8f7;
+    /* fallback */
+}
+
+/* --- Front Face (Address) --- */
+.solver-form .front {
+    z-index: 2;
+    transform: rotateY(0deg);
+    background: beige url("https://pepsized.com/wp-content/uploads/2012/11/bg.png");
+    /* Using base64 or texture would be better, but linking for auth */
+    /* To replace with local asset if needed, or CSS pattern */
+    background-image: radial-gradient(#dcdcdc 1px, transparent 1px), radial-gradient(#dcdcdc 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-color: #f6f1ed;
+
+    border: 1px #eae1d5 solid;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #837362;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.solver-stamp {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    height: 90px;
+    transform: rotate(5deg);
+    display: block;
+}
+
+.solver-stamp img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.9;
+}
+
+.solver-info h2 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+    text-align: center;
+}
+
+.solver-info p {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.solver-flip-btn {
+    margin-top: 30px;
+    color: #9b4849;
+    text-decoration: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-bottom: 1px dashed #9b4849;
+    transition: color 0.3s;
+}
+
+.solver-flip-btn:hover {
+    color: #783839;
+}
+
+/* --- Back Face (Envelope Back) --- */
+.solver-form .back {
+    transform: rotateY(180deg);
+    background: #837362;
+    /* Darker border tone */
+    /* Only the border/outer part is this color technically, usually covered */
+}
+
+/* #content style equivalent */
+.solver-content {
+    position: relative;
+    width: 600px;
+    height: 300px;
+    /* perspective is inherited */
+}
+
+/* Top part (Fixed visual of envelope bottom/body) */
+.solver-top {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65%;
+    /* Covers bottom part */
+    z-index: 10;
+    background-color: #f6f1ed;
+    background-image: radial-gradient(#dcdcdc 1px, transparent 1px), radial-gradient(#dcdcdc 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 1px #eae1d5 solid;
+    box-shadow: inset 0 0 10px 1px rgba(255, 255, 255, 0.6), 0 -2px 4px -3px rgba(0, 0, 0, 0.75);
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 20px;
+}
+
+.solver-flip-back-action {
+    color: #9b4849;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* --- LID (The flap) --- */
+.solver-lid-container {
+    position: relative;
+    width: 100%;
+    height: 50%;
+    /* Top half */
+    perspective: 800px;
+    z-index: 20;
+    /* Above letter initially */
+    transition: z-index 0s 1s;
+    /* Delay z-index swap when opening */
+}
+
+/* When open, lid goes behind letter */
+.solver-lid-container.open {
+    z-index: 0;
+    transition: z-index 0s 0.5s;
+}
+
+.solver-lid-flip {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.5s 1s;
+    /* Delay opening */
+    transform-origin: top;
+}
+
+.solver-lid-container.open .solver-lid-flip {
+    transform: rotateX(180deg);
+    transition: transform 0.5s 0s;
+    /* Immediate open */
+}
+
+.solver-lid-flip .front,
+.solver-lid-flip .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+/* Lid Front: Inputs */
+.solver-lid-flip .front {
+    background-color: #f6f1ed;
+    background-image: radial-gradient(#dcdcdc 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 1px #eae1d5 solid;
+    border-top: none;
+    /* attached to top */
+    border-radius: 0 0 50px 50px;
+    /* Slight curve */
+    box-shadow: inset 0 0 10px 1px rgba(255, 255, 255, 0.6), 0 2px 3px -2px rgba(0, 0, 0, 0.6);
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 20px 40px;
+    align-items: flex-start;
+}
+
+/* Inputs on lid */
+.solver-lid-inputs {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.solver-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.solver-input-group label {
+    font-size: 0.9rem;
+    color: #8b4513;
+    margin-bottom: 2px;
+}
+
+.solver-input-group input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px dotted #8b4513;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #333;
+    width: 100%;
+    padding: 2px 0;
+}
+
+.solver-input-group input:focus {
+    outline: none;
+    border-bottom: 1px solid #9b4849;
+}
+
+.solver-open-action {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #9b4849;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* Lid Back: Matches envelope inner */
+.solver-lid-flip .back {
+    transform: rotateX(180deg);
+    background: #837362;
+    border-radius: 40px 40px 0 0;
+    /* Inverted curve effectively */
+    border: 35px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    box-shadow: inset 0 10px 30px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- THE LETTER --- */
+.solver-letter {
+    position: absolute;
+    top: 5px;
+    left: 5%;
+    width: 90%;
+    height: 95%;
+    background: #fafafa;
+    z-index: 5;
+    transition: top 0.5s 0.5s;
+    /* Slide out delay */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.solver-lid-container.open~.solver-letter {
+    top: -40%;
+    /* Slide up */
+    z-index: 30;
+    /* Above everything */
+    transition: top 0.5s 0.5s, z-index 0s 0.5s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.solver-letter-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.solver-letter h3 {
+    margin-top: 0;
+    color: #9b4849;
+    font-size: 1.4rem;
+}
+
+.solver-letter p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.solver-letter textarea {
+    flex: 1;
+    width: 100%;
+    border: 1px dashed #c8bfb6;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 10px;
+    font-family: inherit;
+    resize: none;
+    font-size: 1rem;
+}
+
+.solver-letter textarea:focus {
+    outline: none;
+    background: #fff;
+    border-color: #9b4849;
+}
+
+.solver-send-btn {
+    align-self: flex-end;
+    margin-top: 10px;
+    background: #9b4849;
+    color: white;
+    border: none;
+    padding: 5px 20px;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.3s;
+}
+
+.solver-send-btn:hover {
+    background: #783839;
+}
+
+.solver-letter-close {
+    align-self: flex-end;
+    font-size: 0.9rem;
+    color: #9b4849;
+    cursor: pointer;
+    margin-bottom: 5px;
+}

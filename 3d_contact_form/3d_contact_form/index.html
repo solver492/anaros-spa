@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+		<meta charset="UTF-8" />
+        <title>3D contact form</title>
+        <meta name="description" content="A contact form with some fancy 3D effects" />
+        <meta name="keywords" content="css3, transforms, transitions, contact form, 3d" />
+        <meta name="author" content="PeHaa for PEPSized" />
+		<script src="js/modernizr.js" type="text/javascript" charset="utf-8"></script>
+		
+        <!--[if IE 8]>
+			<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+			<script>	
+				$(document).ready(function(){
+					$("#contact").addClass("target");
+					$("#flip2back, #close").click(function(e){
+						$(".target").removeClass("target");
+						e.preventDefault();
+					});
+					$("#open, #flip").click(function(e){
+						var $anchor = $(this);
+            			$($anchor.attr('href')).addClass("target");
+						e.preventDefault();
+					});
+				});
+			</script>
+        <![endif]-->
+	
+<link rel="stylesheet" href="stylesheets/style.css">
+<link href='http://fonts.googleapis.com/css?family=Satisfy' rel='stylesheet' type='text/css'>
+</head>
+<body>
+	<section class="container" id="contact" >
+		<form class="flip">
+			<div class="front">
+				<h2>Contact info</h2>
+				<p>13 bis rue Peps</p>
+				<p>75004 Paris France</p>
+				<a id="flip2back" href="#">Drop me a line !</a>
+			</div>
+			<div id="content" class="back">
+				<div id="letter">
+					<div class="container">
+						<div class="flip">
+			  				<div class="front"></div>
+			  				<div class="back">
+								You'd like us to work for you or you're here to say hello ? Don't hesitate - just drop us a line. You'll hear back from us soon. Thanks. 
+								<a id="close" href="#">Close</a>
+							</div>
+						</div>
+					</div>
+					<textarea  class="required" id="message" name="message" placeholder="Your message"></textarea>	
+					<input type="submit" class="submit" value="Send" />
+				</div>
+				<div id="top">
+					<a id="flip" href="#contact">Flip</a>
+				</div>
+				<div id="lid" class="container">
+  					<div class="flip">    
+  						<div class="front">
+							<div>
+								<label for="name">Your name :</label>
+								<input type="text"  id="name" name="name">
+							</div>
+							<div>
+								<label for="mail">Your email :</label>
+								<input type="text" id="mail" name="mail" >
+							</div>
+							<a id="open" href="#content">Open</a>
+						</div>
+						<div class="back"></div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</section>
+</body>
+</html>
+

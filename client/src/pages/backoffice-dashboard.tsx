@@ -7,6 +7,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { SolverContact } from "@/components/solver-contact";
+import { useState } from "react";
 
 interface Stats {
     products: {
@@ -31,6 +33,7 @@ interface Stats {
 }
 
 export default function BackOfficeDashboard() {
+    const [showContactSolver, setShowContactSolver] = useState(false);
     const { data: stats, isLoading } = useQuery<Stats>({
         queryKey: ["/api/shop/stats"],
     });
@@ -72,14 +75,27 @@ export default function BackOfficeDashboard() {
                                 Gestion de la boutique Anaros
                             </p>
                         </div>
-                        <Link href="/">
-                            <Button variant="ghost" className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
-                                Retour au site
+                        <div className="flex gap-4">
+                            <Button
+                                variant="outline"
+                                className="border-purple-500 text-purple-600 hover:bg-purple-50"
+                                onClick={() => setShowContactSolver(true)}
+                            >
+                                Contacte Solver
                             </Button>
-                        </Link>
+                            <Link href="/">
+                                <Button variant="ghost" className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                                    Retour au site
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                 </div>
-            </header >
+            </header>
+
+            {showContactSolver && (
+                <SolverContact onClose={() => setShowContactSolver(false)} />
+            )}
 
             <div className="container mx-auto px-6 py-8">
                 {/* Stats Cards */}
